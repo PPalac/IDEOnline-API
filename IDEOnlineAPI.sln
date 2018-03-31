@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDEOnline-API", "IDEOnline-API\IDEOnline-API.csproj", "{6A155956-3602-4B76-B9F1-38A7A4413F92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDEOnlineAPI", "IDEOnline-API\IDEOnlineAPI.csproj", "{6A155956-3602-4B76-B9F1-38A7A4413F92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,10 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using IDEOnlineAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
-namespace IDEOnline_API.Controllers
+namespace IDEOnlineAPI.Controllers
 {
     [Route("api/[controller]")]
     public class IDEController : Controller
     {
+        private IIDEService ideService;
+
+        public IDEController(IIDEService ideService)
+        {
+            this.ideService = ideService;
+        }
         // GET api/values
         [HttpGet]
         [Route("Run")]
@@ -17,10 +24,23 @@ namespace IDEOnline_API.Controllers
         // POST api/values
         [HttpPost]
         [Route("Compile")]
-        public IActionResult Compile([FromBody]string value)
+        public IActionResult Compile([FromBody]Code code)
         {
-            var jsonResult = Json("No kompiluje");
-            return Ok(jsonResult);
+            try
+            {
+                var result = ideService.Compile(code.value);
+                var jsonResult = Json(result);
+                return Ok(jsonResult);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
+    }
+
+    public class Code
+    {
+        public string value { get; set; }
     }
 }

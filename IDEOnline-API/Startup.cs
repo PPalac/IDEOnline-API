@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IDEOnlineAPI.Services;
+using IDEOnlineAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +31,7 @@ namespace IDEOnline_API
             });
 
             services.AddMvc();
+            services.AddTransient<IIDEService, IDEService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
