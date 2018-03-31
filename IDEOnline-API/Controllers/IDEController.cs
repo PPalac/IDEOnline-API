@@ -10,13 +10,17 @@ namespace IDEOnline_API.Controllers
         [Route("Run")]
         public IActionResult Run()
         {
-            return Ok("value1 value2");
+            var jsonResult = Json("No uruchamiam");
+            return Ok(jsonResult);
         }
 
         // POST api/values
         [HttpPost]
-        public void Compile([FromBody]string value)
+        [Route("Compile")]
+        public IActionResult Compile([FromBody]string value)
         {
+            var jsonResult = Json("No kompiluje");
+            return Ok(jsonResult);
         }
     }
 }
