@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 
-namespace IDEOnline_API
+namespace IDEOnlineAPI
 {
     public class Startup
     {

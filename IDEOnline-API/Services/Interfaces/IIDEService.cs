@@ -7,7 +7,7 @@ namespace IDEOnlineAPI.Services.Interfaces
 {
     public interface IIDEService
     {
-        string Run();
-        string Compile(string code);
+        Task<string> RunAsync();
+        Task<string> CompileAsync(string code);
     }
 }

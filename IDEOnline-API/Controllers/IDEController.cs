@@ -1,5 +1,7 @@
 ﻿using IDEOnlineAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Controllers
 {
@@ -15,24 +17,34 @@ namespace IDEOnlineAPI.Controllers
         // GET api/values
         [HttpGet]
         [Route("Run")]
-        public IActionResult Run()
+        [Produces("text/plain")]
+        public async Task<IActionResult> RunAsync()
         {
-            var jsonResult = Json("No uruchamiam");
-            return Ok(jsonResult);
+            try
+            {
+                var result = await ideService.RunAsync();
+                var jsonResult = Json(result);
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
         }
 
         // POST api/values
         [HttpPost]
         [Route("Compile")]
-        public IActionResult Compile([FromBody]Code code)
+        public async Task<IActionResult> CompileAsync([FromBody]Code code)
         {
             try
             {
-                var result = ideService.Compile(code.value);
+                var result = await ideService.CompileAsync(code.value);
+                result.Replace(@"\r", " ");
                 var jsonResult = Json(result);
-                return Ok(jsonResult);
+                return jsonResult;
             }
-            catch
+            catch (Exception ex)
             {
                 return BadRequest();
             }
