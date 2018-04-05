@@ -20,7 +20,7 @@ namespace IDEOnlineAPI.Services
             Directory.CreateDirectory(directory);
             File.WriteAllText(Path.Combine(directory, "Program.cs"), code);
 
-            var compiler = new ProcessHelper();
+            var compiler = new IDEHelper();
             var result = await compiler.CompileCodeAsync();
 
             return result;
@@ -28,7 +28,7 @@ namespace IDEOnlineAPI.Services
 
         public async Task<string> RunAsync()
         {
-            var runner = new ProcessHelper();
+            var runner = new IDEHelper();
             var result = await runner.RunAppAsync();
 
             return result;

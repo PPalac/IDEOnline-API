@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Helpers
 {
-    public class ProcessHelper
+    public class IDEHelper
     {
         private Process process;
         private ProcessStartInfo startInfo;
         private string directory;
 
-        public ProcessHelper()
+        public IDEHelper()
         {
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
         }
@@ -24,7 +24,7 @@ namespace IDEOnlineAPI.Helpers
                 WorkingDirectory = directory,
                 Arguments = $"Program.cs",
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
             };
 
             process = new Process
@@ -35,6 +35,10 @@ namespace IDEOnlineAPI.Helpers
             process.Start();
 
             var output = await process.StandardOutput.ReadToEndAsync();
+            var exitCode = process.ExitCode;
+
+            if (exitCode == 0)
+                return "Compile Succeded!";
 
             return output;
         }
