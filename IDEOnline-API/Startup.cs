@@ -1,4 +1,6 @@
-﻿using IDEOnlineAPI.Services;
+﻿using IDEOnlineAPI.Helpers;
+using IDEOnlineAPI.Hubs;
+using IDEOnlineAPI.Services;
 using IDEOnlineAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +33,8 @@ namespace IDEOnlineAPI
             });
 
             services.AddMvc();
-            services.AddTransient<IIDEService, IDEService>();
+            services.AddSignalR();
+            services.AddScoped<IIDEService, IDEService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +47,10 @@ namespace IDEOnlineAPI
 
             app.UseCors("AllowAll");
             app.UseMvc();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<RuntimeHub>("/Runtime");
+            });
         }
     }
 }

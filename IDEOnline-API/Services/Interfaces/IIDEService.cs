@@ -7,7 +7,11 @@ namespace IDEOnlineAPI.Services.Interfaces
 {
     public interface IIDEService
     {
-        Task<string> RunAsync();
-        Task<string> CompileAsync(string code);
+        event EventHandler<string> OnOutputRecived;
+        event EventHandler<string> OnStandardInputRequest;
+
+        Task<int> RunAsync(string ID);
+        Task<string> CompileAsync(string code, string ID);
+        Task InputRecivedAsync(string input, string ID);
     }
 }

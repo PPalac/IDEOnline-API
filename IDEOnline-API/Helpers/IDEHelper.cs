@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Helpers
@@ -10,21 +12,25 @@ namespace IDEOnlineAPI.Helpers
         private Process process;
         private ProcessStartInfo startInfo;
         private string directory;
+        private bool waitingForInput;
+
+        public event EventHandler<string> OnOutputRecived;
+        public event EventHandler<string> OnStandardInputRequest;
 
         public IDEHelper()
         {
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
         }
 
-        public async Task<string> CompileCodeAsync()
+        public async Task<string> CompileCodeAsync(string ID)
         {
             startInfo = new ProcessStartInfo
             {
                 FileName = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Roslyn\csc.exe",
                 WorkingDirectory = directory,
-                Arguments = $"Program.cs",
+                Arguments = $"{ID}.cs",
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                RedirectStandardError = true
             };
 
             process = new Process
@@ -43,14 +49,16 @@ namespace IDEOnlineAPI.Helpers
             return output;
         }
 
-        public async Task<string> RunAppAsync()
+        public async Task<int> RunAppAsync(string ID)
         {
             startInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(directory, "Program"),
+                FileName = Path.Combine(directory, $"{ID}"),
                 WorkingDirectory = directory,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false
             };
 
             process = new Process
@@ -59,10 +67,34 @@ namespace IDEOnlineAPI.Helpers
             };
 
             process.Start();
+            await ScanOutput();
 
-            var output = await process.StandardOutput.ReadToEndAsync();
+            return 0;
+        }            
 
-            return output;
+        public async Task InputRecived(string input, string ID)
+        {
+            startInfo = new ProcessStartInfo
+            {
+                FileName = Path.Combine(directory, $"{ID}"),
+                RedirectStandardInput = true                
+            };
+            process.Start();
+
+            await process.StandardInput.WriteLineAsync(input);
+        }
+
+        private async Task ScanOutput()
+        {
+
+            while (true)
+            {
+                OnOutputRecived.Invoke(this, process.StandardOutput.ReadLine());
+                if (process.StandardOutput.EndOfStream)
+                {
+                    break;
+                }
+            }
         }
     }
 }
