@@ -91,7 +91,21 @@ namespace IDEOnlineAPI.Helpers
 
             return 0;
         }
-        
+
+        /// <summary>
+        /// Kill process of given ID name.
+        /// </summary>
+        /// <param name="ID">Process name</param>
+        public void KillRunningProcess(string ID)
+        {
+            var processes = Process.GetProcessesByName(ID);
+
+            foreach (var process in processes)
+            {
+                process.Kill();
+            }
+        }
+
         /// <summary>
         /// Method used to pass value to standard input
         /// </summary>

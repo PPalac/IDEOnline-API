@@ -62,6 +62,15 @@ namespace IDEOnlineAPI.Hubs
         }
 
         /// <summary>
+        /// Invoked from frontend to kill process of given ID.
+        /// </summary>
+        /// <param name="ID"></param>
+        public void Kill(string ID)
+        {
+            ideService.Kill(ID);
+        }
+
+        /// <summary>
         /// Method called when output recived from running application.
         /// </summary>
         /// <param name="sender"></param>

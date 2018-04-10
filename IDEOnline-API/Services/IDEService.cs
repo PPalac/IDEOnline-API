@@ -53,7 +53,7 @@ namespace IDEOnlineAPI.Services
         /// <summary>
         /// Runs application of given ID.
         /// </summary>
-        /// <param name="ID"></param>
+        /// <param name="ID">Name of process to run</param>
         /// <returns>0 when ends.</returns>
         public async Task<int> RunAsync(string ID)
         {
@@ -64,6 +64,16 @@ namespace IDEOnlineAPI.Services
             var result = await runHelper.RunAppAsync(ID);
 
             return result;
+        }
+
+        /// <summary>
+        /// Kill running process of given ID
+        /// </summary>
+        /// <param name="ID">Name of running process</param>
+        public void Kill(string ID)
+        {
+            runHelper = new IDEHelper();
+            runHelper.KillRunningProcess(ID);
         }
 
         /// <summary>
