@@ -5,21 +5,38 @@ using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Helpers
 {
+    /// <summary>
+    /// Helper class to manage compiling and running process of console application.
+    /// </summary>
     public class IDEHelper
     {
         private Process process;
         private ProcessStartInfo startInfo;
         private string directory;
-        private bool waitingForInput;
 
+        /// <summary>
+        /// EventHandler invoked when output from application is recived.
+        /// </summary>
         public event EventHandler<string> OnOutputRecived;
+
+        /// <summary>
+        /// EventHandler ivoked when input of application is needed.
+        /// </summary>
         public event EventHandler<string> OnStandardInputRequest;
 
+        /// <summary>
+        /// IDEHelper Constructor.
+        /// </summary>
         public IDEHelper()
         {
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
         }
 
+        /// <summary>
+        /// Method used to compile code saved in file.
+        /// </summary>
+        /// <param name="ID">File name where code is saved. Further process name.</param>
+        /// <returns></returns>
         public async Task<string> CompileCodeAsync(string ID)
         {
             startInfo = new ProcessStartInfo
@@ -47,6 +64,11 @@ namespace IDEOnlineAPI.Helpers
             return output;
         }
 
+        /// <summary>
+        /// Method to start console application process.
+        /// </summary>
+        /// <param name="ID">File name created during compiling process</param>
+        /// <returns></returns>
         public async Task<int> RunAppAsync(string ID)
         {
             startInfo = new ProcessStartInfo
@@ -65,34 +87,38 @@ namespace IDEOnlineAPI.Helpers
             };
 
             process.Start();
-            await Task.Run(ScanOutput);
+            await ScanOutputAsync();
 
             return 0;
-        }            
-
-        public async Task InputRecived(string input, string ID)
+        }
+        
+        /// <summary>
+        /// Method used to pass value to standard input
+        /// </summary>
+        /// <param name="input">Input value</param>
+        /// <returns></returns>
+        public async Task PassInputAsync(string input)
         {
-            startInfo = new ProcessStartInfo
-            {
-                FileName = Path.Combine(directory, $"{ID}"),
-                RedirectStandardInput = true                
-            };
-            process.Start();
-
-            await process.StandardInput.WriteLineAsync(input);
         }
 
-        private async Task ScanOutput()
+        /// <summary>
+        /// Method to scan standard output of console application.
+        /// </summary>
+        /// <returns></returns>
+        private async Task ScanOutputAsync()
         {
-            while (true)
+            await Task.Run(() =>
             {
-                OnOutputRecived.Invoke(this, process.StandardOutput.ReadLine());
-
-                if (process.StandardOutput.EndOfStream)
+                while (true)
                 {
-                    break;
+                    OnOutputRecived.Invoke(this, process.StandardOutput.ReadLine());
+
+                    if (process.StandardOutput.EndOfStream)
+                    {
+                        break;
+                    }
                 }
-            }
+            });
         }
     }
 }

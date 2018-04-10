@@ -39,9 +39,9 @@ namespace IDEOnlineAPI
                 {
                     Version = "v1",
                     Title = "IDEOnline API",
-                    Description = "API for online ide to compile and run console app written in C#.",
-                    TermsOfService = "None",
+                    Description = "API for online ide to compile and run console app written in C#."
                 });
+                c.IncludeXmlComments(string.Format(@"{0}\Documentation.XML", System.AppDomain.CurrentDomain.BaseDirectory));
             });
             services.AddSignalR();
             services.AddScoped<IIDEService, IDEService>();

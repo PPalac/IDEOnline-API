@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Services.Interfaces
 {
+    /// <summary>
+    /// IDEService interface.
+    /// </summary>
     public interface IIDEService
     {
         event EventHandler<string> OnOutputRecived;
@@ -12,6 +15,6 @@ namespace IDEOnlineAPI.Services.Interfaces
 
         Task<int> RunAsync(string ID);
         Task<string> CompileAsync(string code, string ID);
-        Task InputRecivedAsync(string input, string ID);
+        Task PassInputAsync(string input);
     }
 }

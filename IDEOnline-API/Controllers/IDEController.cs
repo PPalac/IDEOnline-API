@@ -14,6 +14,10 @@ namespace IDEOnlineAPI.Controllers
     {
         private IIDEService ideService;
 
+        /// <summary>
+        /// IDEController constructor
+        /// </summary>
+        /// <param name="ideService"></param>
         public IDEController(IIDEService ideService)
         {
             this.ideService = ideService;
@@ -23,7 +27,7 @@ namespace IDEOnlineAPI.Controllers
         /// Compile endpoint. Used to compile given code.
         /// </summary>
         /// <param name="code">Param is object with code property.</param>
-        /// <returns></returns>
+        /// <returns>Json result with compile output when complete sucessfully, BadRequest otherwise.</returns>
         [HttpPost]
         [Route("Compile")]
         public async Task<IActionResult> CompileAsync([FromBody]CodeViewModel code)
@@ -42,7 +46,7 @@ namespace IDEOnlineAPI.Controllers
                 var jsonResult = Json(response);
                 return jsonResult;
             }
-            catch (Exception ex)
+            catch
             {
                 return BadRequest();
             }
