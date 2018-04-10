@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Helpers
@@ -67,7 +65,7 @@ namespace IDEOnlineAPI.Helpers
             };
 
             process.Start();
-            await ScanOutput();
+            await Task.Run(ScanOutput);
 
             return 0;
         }            
@@ -86,10 +84,10 @@ namespace IDEOnlineAPI.Helpers
 
         private async Task ScanOutput()
         {
-
             while (true)
             {
                 OnOutputRecived.Invoke(this, process.StandardOutput.ReadLine());
+
                 if (process.StandardOutput.EndOfStream)
                 {
                     break;

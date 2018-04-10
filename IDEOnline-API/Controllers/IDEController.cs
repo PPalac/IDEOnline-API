@@ -1,10 +1,14 @@
-﻿using IDEOnlineAPI.Services.Interfaces;
+﻿using IDEOnlineAPI.Models;
+using IDEOnlineAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Controllers
 {
+    /// <summary>
+    /// Main controller of IDEOnline. Used only to compile code.
+    /// </summary>
     [Route("api/[controller]")]
     public class IDEController : Controller
     {
@@ -15,37 +19,23 @@ namespace IDEOnlineAPI.Controllers
             this.ideService = ideService;
         }
 
-        //// GET api/values
-        //[HttpGet]
-        //[Route("Run")]
-        //[Produces("text/plain")]
-        //public async Task<IActionResult> RunAsync()
-        //{
-        //    try
-        //    {
-        //        var result = await ideService.RunAsync();
-        //        var jsonResult = Json(result);
-        //        return jsonResult;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest();
-        //    }
-        //}
-
-        // POST api/values
+        /// <summary>
+        /// Compile endpoint. Used to compile given code.
+        /// </summary>
+        /// <param name="code">Param is object with code property.</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Compile")]
-        public async Task<IActionResult> CompileAsync([FromBody]Code code)
+        public async Task<IActionResult> CompileAsync([FromBody]CodeViewModel code)
         {
             var ID = Guid.NewGuid();
 
             try
             {
-                var result = await ideService.CompileAsync(code.value, ID.ToString());
+                var result = await ideService.CompileAsync(code.Value, ID.ToString());
                 var response = new CompileResult()
                 {
-                    compileResult = result,
+                    Result = result,
                     ID = ID.ToString()
                 };
 
@@ -57,16 +47,5 @@ namespace IDEOnlineAPI.Controllers
                 return BadRequest();
             }
         }
-    }
-
-    public class Code
-    {
-        public string value { get; set; }
-    }
-
-    public class CompileResult
-    {
-        public string compileResult { get; set; }
-        public string ID { get; set; }
     }
 }
