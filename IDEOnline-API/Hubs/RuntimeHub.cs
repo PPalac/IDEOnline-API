@@ -1,5 +1,9 @@
-﻿using IDEOnlineAPI.Services.Interfaces;
+﻿using IDEOnlineAPI.Models;
+using IDEOnlineAPI.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Hubs
@@ -11,6 +15,8 @@ namespace IDEOnlineAPI.Hubs
     {
         private IIDEService ideService;
 
+        public static List<Connections> connections = new List<Connections>();
+
         /// <summary>
         /// RuntimeHub contructor.
         /// </summary>
@@ -18,17 +24,6 @@ namespace IDEOnlineAPI.Hubs
         public RuntimeHub(IIDEService ideService)
         {
             this.ideService = ideService;
-            ideService.OnOutputRecived += IDEService_OnOutputRecivedAsync;
-            ideService.OnStandardInputRequest += IDEService_OnInputRequestAsync;
-        }
-
-        /// <summary>
-        /// Method to invoke frontend function while input is needed.
-        /// </summary>
-        /// <returns></returns>
-        public async Task InputRequest()
-        {
-            await Clients.Client(Context.ConnectionId).SendAsync("RequestInput");
         }
 
         /// <summary>
@@ -36,9 +31,9 @@ namespace IDEOnlineAPI.Hubs
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        public async Task SendOutput(string output)
+        public async Task SendOutput(string output, string connectionId)
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("Output", output);
+            await Clients.Client(connectionId).SendAsync("Output", output);
         }
 
         /// <summary>
@@ -48,6 +43,7 @@ namespace IDEOnlineAPI.Hubs
         /// <returns></returns>
         public async Task Run(string ID)
         {
+            connections.Add(new Connections { ConnectionId = Context.ConnectionId, ProcessId = ID });
             await ideService.RunAsync(ID);
         }
 
@@ -55,10 +51,11 @@ namespace IDEOnlineAPI.Hubs
         /// Method invoked from frontend. Passing values to standard input of running application.
         /// </summary>
         /// <param name="input">Input value</param>
+        /// <param name="id">Id of running process</param>
         /// <returns></returns>
-        public async Task Input(string input)
+        public void Input(string input, string id)
         {
-            await ideService.PassInputAsync(input);
+            ideService.PassInputAsync(input, id);
         }
 
         /// <summary>
@@ -68,26 +65,6 @@ namespace IDEOnlineAPI.Hubs
         public void Kill(string ID)
         {
             ideService.Kill(ID);
-        }
-
-        /// <summary>
-        /// Method called when output recived from running application.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="output">Output value</param>
-        private async void IDEService_OnOutputRecivedAsync(object sender, string output)
-        {
-            await SendOutput(output);
-        }
-
-        /// <summary>
-        /// Method called when input values recived from frontend.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="input">Input value</param>
-        private async void IDEService_OnInputRequestAsync(object sender, string input)
-        {
-            await InputRequest();
         }
     }
 }

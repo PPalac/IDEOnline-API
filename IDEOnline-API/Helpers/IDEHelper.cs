@@ -1,6 +1,12 @@
-﻿using System;
+﻿using IDEOnlineAPI.Hubs;
+using IDEOnlineAPI.Models;
+using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IDEOnlineAPI.Helpers
@@ -13,22 +19,22 @@ namespace IDEOnlineAPI.Helpers
         private Process process;
         private ProcessStartInfo startInfo;
         private string directory;
+        private IHubContext<RuntimeHub> hubContext;
 
-        /// <summary>
-        /// EventHandler invoked when output from application is recived.
-        /// </summary>
-        public event EventHandler<string> OnOutputRecived;
-
-        /// <summary>
-        /// EventHandler ivoked when input of application is needed.
-        /// </summary>
-        public event EventHandler<string> OnStandardInputRequest;
+        private static List<StreamWriterModel> InputStreams = new List<StreamWriterModel>();
+        private static List<string> processesToScan = new List<string>();
 
         /// <summary>
         /// IDEHelper Constructor.
         /// </summary>
         public IDEHelper()
         {
+            directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
+        }
+
+        public IDEHelper(IHubContext<RuntimeHub> hubContext)
+        {
+            this.hubContext = hubContext;
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
         }
 
@@ -86,8 +92,24 @@ namespace IDEOnlineAPI.Helpers
                 StartInfo = startInfo
             };
 
+            process.EnableRaisingEvents = true;
+            process.Exited += (s, e) => { InputStreams.RemoveAll(st => st.Id == ID); RuntimeHub.connections.RemoveAll(c => c.ProcessId == ID); processesToScan.RemoveAll(p => p == ID); };
             process.Start();
-            await ScanOutputAsync();
+
+
+            InputStreams.Add(new StreamWriterModel
+            {
+                Id = ID,
+                StreamWriter = process.StandardInput
+            });
+
+            var outputScanThread = new Thread(new ParameterizedThreadStart(ScanOutputAsync))
+            {
+                IsBackground = true
+            };
+
+            processesToScan.Add(ID);
+            outputScanThread.Start();
 
             return 0;
         }
@@ -95,10 +117,10 @@ namespace IDEOnlineAPI.Helpers
         /// <summary>
         /// Kill process of given ID name.
         /// </summary>
-        /// <param name="ID">Process name</param>
-        public void KillRunningProcess(string ID)
+        /// <param name="id">Process name</param>
+        public void KillRunningProcess(string id)
         {
-            var processes = Process.GetProcessesByName(ID);
+            var processes = Process.GetProcessesByName(id);
 
             foreach (var process in processes)
             {
@@ -110,29 +132,40 @@ namespace IDEOnlineAPI.Helpers
         /// Method used to pass value to standard input
         /// </summary>
         /// <param name="input">Input value</param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public async Task PassInputAsync(string input)
+        public void PassInputAsync(string input, string id)
         {
+            var stream = InputStreams.Where(s => s.Id == id).FirstOrDefault();
+
+            if (stream != null)
+            {
+                stream.StreamWriter.WriteLine(input);
+                processesToScan.Add(id);
+            }
         }
 
         /// <summary>
         /// Method to scan standard output of console application.
         /// </summary>
         /// <returns></returns>
-        private async Task ScanOutputAsync()
+        private void ScanOutputAsync(object data)
         {
-            await Task.Run(() =>
+            while (true)
             {
-                while (true)
+                if (process.StandardOutput.EndOfStream)
                 {
-                    OnOutputRecived.Invoke(this, process.StandardOutput.ReadLine());
-
-                    if (process.StandardOutput.EndOfStream)
+                    break;
+                }
+                else
+                {
+                    var connection = RuntimeHub.connections.Where(c => c.ProcessId == process.ProcessName).SingleOrDefault();
+                    if (connection != null)
                     {
-                        break;
+                        hubContext.Clients.Client(connection.ConnectionId).SendAsync("Output", process.StandardOutput.ReadLine());
                     }
                 }
-            });
+            }
         }
     }
 }

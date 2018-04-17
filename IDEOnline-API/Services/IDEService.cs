@@ -1,5 +1,7 @@
 ﻿using IDEOnlineAPI.Helpers;
+using IDEOnlineAPI.Hubs;
 using IDEOnlineAPI.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,24 +13,16 @@ namespace IDEOnlineAPI.Services
     /// </summary>
     public class IDEService : IIDEService
     {
+        private IHubContext<RuntimeHub> hubContext;
         private string directory;
         private IDEHelper runHelper;
 
         /// <summary>
-        /// EventHandler invoked when output from application is recived.
-        /// </summary>
-        public event EventHandler<string> OnOutputRecived;
-
-        /// <summary>
-        /// EventHandler invoked when input of application is needed. 
-        /// </summary>
-        public event EventHandler<string> OnStandardInputRequest;
-
-        /// <summary>
         /// IDEService constructor.
         /// </summary>
-        public IDEService()
+        public IDEService(IHubContext<RuntimeHub> hubContext)
         {
+            this.hubContext = hubContext;
             directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "IDEOnline", "Miscs");
             
         }
@@ -57,9 +51,7 @@ namespace IDEOnlineAPI.Services
         /// <returns>0 when ends.</returns>
         public async Task<int> RunAsync(string ID)
         {
-            runHelper = new IDEHelper();
-            runHelper.OnOutputRecived += OnOutputRecived;
-            runHelper.OnStandardInputRequest += OnStandardInputRequest;
+            runHelper = new IDEHelper(hubContext);
 
             var result = await runHelper.RunAppAsync(ID);
 
@@ -80,11 +72,12 @@ namespace IDEOnlineAPI.Services
         /// 
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public async Task PassInputAsync(string input)
+        public void PassInputAsync(string input, string id)
         {
             runHelper = new IDEHelper();
-            await runHelper.PassInputAsync(input);
+            runHelper.PassInputAsync(input, id);
         }
     }
 }
