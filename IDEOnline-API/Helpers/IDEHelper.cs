@@ -84,7 +84,7 @@ namespace IDEOnlineAPI.Helpers
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
-                UseShellExecute = false
+                UseShellExecute = false                
             };
 
             process = new Process
@@ -93,9 +93,14 @@ namespace IDEOnlineAPI.Helpers
             };
 
             process.EnableRaisingEvents = true;
-            process.Exited += (s, e) => { InputStreams.RemoveAll(st => st.Id == ID); RuntimeHub.connections.RemoveAll(c => c.ProcessId == ID); processesToScan.RemoveAll(p => p == ID); };
-            process.Start();
+            process.Exited += (s, e) => 
+            {
+                InputStreams.RemoveAll(st => st.Id == ID);
+                RuntimeHub.connections.RemoveAll(c => c.ProcessId == ID);
+                processesToScan.RemoveAll(p => p == ID);
+            };
 
+            process.Start();
 
             InputStreams.Add(new StreamWriterModel
             {
@@ -140,8 +145,8 @@ namespace IDEOnlineAPI.Helpers
 
             if (stream != null)
             {
-                stream.StreamWriter.WriteLine(input);
                 processesToScan.Add(id);
+                stream.StreamWriter.WriteLine(input);
             }
         }
 

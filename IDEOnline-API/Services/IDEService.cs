@@ -36,6 +36,8 @@ namespace IDEOnlineAPI.Services
         public async Task<string> CompileAsync(string code, string ID)
         {
             Directory.CreateDirectory(directory);
+            code = $"using System.Threading; {code}";
+            code = code.Insert(code.LastIndexOf(';') + 1, "Thread.Sleep(20);");
             File.WriteAllText(Path.Combine(directory, $"{ID}.cs"), code);
 
             var compiler = new IDEHelper();
@@ -66,6 +68,9 @@ namespace IDEOnlineAPI.Services
         {
             runHelper = new IDEHelper();
             runHelper.KillRunningProcess(ID);
+
+            File.Delete(Path.Combine(directory, $"{ID}.exe"));
+            File.Delete(Path.Combine(directory, $"{ID}.cs"));
         }
 
         /// <summary>
