@@ -15,6 +15,9 @@ namespace IDEOnlineAPI.Hubs
     {
         private IIDEService ideService;
 
+        /// <summary>
+        /// Public static List to store informations about connected users.
+        /// </summary>
         public static List<Connections> connections = new List<Connections>();
 
         /// <summary>
@@ -65,6 +68,16 @@ namespace IDEOnlineAPI.Hubs
         public void Kill(string ID)
         {
             ideService.Kill(ID);
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            var connection = connections.Where(c => c.ConnectionId == this.Context.ConnectionId).FirstOrDefault();
+            if (connection != null)
+            {
+                Kill(connection.ProcessId);
+            }
+            return base.OnDisconnectedAsync(exception);
         }
     }
 }
