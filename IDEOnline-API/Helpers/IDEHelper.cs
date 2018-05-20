@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,7 +68,9 @@ namespace IDEOnlineAPI.Helpers
             if (exitCode == 0)
                 return "Compile Succeded!";
 
-            return output;
+            var errorMessage = Regex.Match(output, @"\((\d,\d*)\)").Value;
+
+            return $"Error in line: {errorMessage}";
         }
 
         /// <summary>

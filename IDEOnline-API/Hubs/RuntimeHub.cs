@@ -70,6 +70,11 @@ namespace IDEOnlineAPI.Hubs
             ideService.Kill(ID);
         }
 
+        /// <summary>
+        /// Killing process associated with user and remove process files.
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
         public override Task OnDisconnectedAsync(Exception exception)
         {
             var connection = connections.Where(c => c.ConnectionId == this.Context.ConnectionId).FirstOrDefault();
